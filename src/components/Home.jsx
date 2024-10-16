@@ -62,7 +62,7 @@ const theme = createTheme({
 const BackgroundContainer = styled("div")({
   backgroundImage: `
     linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9)),
-    url("../../public/image.jpg")
+    url("../../image.jpg")
   `,
   backgroundSize: "cover",
   backgroundPosition: "center",
@@ -138,7 +138,6 @@ export default function HomePage() {
           sx={{ backgroundColor: "transparent", boxShadow: "none" }}
         >
         </AppBar>
-
         <ContentContainer>
           {/* Hero Section */}
           <Box sx={{ my: 8, textAlign: "center" }}>
