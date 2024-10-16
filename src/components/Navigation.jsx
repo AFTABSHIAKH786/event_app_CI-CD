@@ -19,7 +19,7 @@ import {
   ListItemText,
   ListItemIcon,
 } from '@mui/material';
-import { ExploreOutlined, DashboardOutlined, HomeOutlined, Menu as MenuIcon, Login, PersonAdd } from '@mui/icons-material';
+import { ExploreOutlined, HomeOutlined, Menu as MenuIcon, Login, PersonAdd } from '@mui/icons-material';
 
 const Navigation = () => {
   const navigate = useNavigate();
@@ -107,13 +107,11 @@ const Navigation = () => {
             <Button color="inherit" component={RouterLink} to="/" startIcon={<HomeOutlined />}>
               Home
             </Button>
-            <Button color="inherit" component={RouterLink} to="/dashboard" startIcon={<ExploreOutlined />}>
+            
+            {user ? (
+              <Button color="inherit" component={RouterLink} to="/dashboard" startIcon={<ExploreOutlined />}>
               Explore
             </Button>
-            {user ? (
-              <Button color="inherit" component={RouterLink} to="/dashboard" startIcon={<DashboardOutlined />}>
-                Dashboard
-              </Button>
             ) : (
               <>
                 <Button color="inherit" component={RouterLink} to="/signin">
