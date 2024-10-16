@@ -86,7 +86,7 @@ const Navigation = () => {
   );
 
   return (
-    <AppBar position="static">
+    <AppBar position="static" sx={{ backgroundColor: 'black' }}>
       <Toolbar>
         {isMobile && (
           <IconButton
@@ -100,14 +100,14 @@ const Navigation = () => {
           </IconButton>
         )}
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          EventBooker
+          <RouterLink>Event Broker</RouterLink>
         </Typography>
         {!isMobile && (
           <>
             <Button color="inherit" component={RouterLink} to="/" startIcon={<HomeOutlined />}>
               Home
             </Button>
-            <Button color="inherit" component={RouterLink} to="/explore" startIcon={<ExploreOutlined />}>
+            <Button color="inherit" component={RouterLink} to="/dashboard" startIcon={<ExploreOutlined />}>
               Explore
             </Button>
             {user ? (

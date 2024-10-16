@@ -57,9 +57,9 @@ const events = [
 
 const Dashboard = () => {
   return (
-    <div>
-      <div style={{ padding: "20px" }}>
-        <Card style={{ marginBottom: "20px" }}>
+    <div className="bg-black">
+      <div className="p-[20px] ">{/*style={{ padding: "20px" }}*/}
+        <Card style={{ marginBottom: "20px" }} >
           <CardContent>
             <Typography variant="h5" gutterBottom>
               On-going events
@@ -121,11 +121,6 @@ const Dashboard = () => {
               ))}
             </Grid>
           </CardContent>
-          <CardActions>
-            <Button color="primary" fullWidth>
-              Create New Event
-            </Button>
-          </CardActions>
         </Card>
       </div>
     </div>

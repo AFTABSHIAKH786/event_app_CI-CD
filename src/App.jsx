@@ -1,12 +1,14 @@
 // src/App.jsx
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { AuthProvider } from './components/AuthProvider';
+import { AuthProvider } from './utils/AuthProvider';
 import Navigation from './components/Navigation';
 import Home from './components/Home';
 import SignUp from './components/SignUp';
 import SignIn from './components/SignIn';
 import Dashboard from './components/Dashboard';
-
+import AdminLoginPage from './components/AdminLoginPage';
+import PrivateRoute from './utils/PrivateRoute';
+import AdminDashboard from './components/AdminDashboard';
 function App() {
   return (
     <AuthProvider>
@@ -18,6 +20,15 @@ function App() {
             <Route path="/signup" element={<SignUp />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/admin/login" element={<AdminLoginPage />} />
+            <Route 
+              path='/admin/dashboard'
+              element={
+                <PrivateRoute>
+                  <AdminDashboard/>
+                </PrivateRoute>
+              }
+            />
           </Routes>
         </div>
       </Router>
