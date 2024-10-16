@@ -1,9 +1,5 @@
-import  { useState, useEffect } from "react";
 import {
-  AppBar,
-  Toolbar,
   Typography,
-  Avatar,
   Grid,
   Paper,
   Button,
@@ -11,8 +7,8 @@ import {
   CardContent,
   CardActions,
 } from "@mui/material";
-import { CalendarToday, LocationOn, Person } from "@mui/icons-material";
-import { auth } from '../firebase';
+import { CalendarToday, LocationOn } from "@mui/icons-material";
+
 // Mock events data
 const events = [
   {
@@ -60,56 +56,16 @@ const events = [
 ];
 
 const Dashboard = () => {
-  const [user, setUser] = useState(auth.currentUser);
-  const [avatarError, setAvatarError] = useState(false);
-
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
-      setUser(currentUser);
-      setAvatarError(false); // Reset error state when user changes
-      // console.log("User photo URL", currentUser?.photoURL)
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  const handleAvatarError = () => {
-    console.error("Failed to load user avatar");
-    setAvatarError(true);
-  };
-
   return (
     <div>
-      <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6" style={{ flexGrow: 1 }}>
-            Dashboard
-          </Typography>
-          {user && (
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <Avatar 
-                src={avatarError ? null : user.photoURL} 
-                alt={user.displayName}
-                onError={handleAvatarError}
-              >
-                {avatarError ? (user.displayName ? user.displayName[0].toUpperCase() : <Person />) : null}
-              </Avatar>
-              <div style={{ marginLeft: "10px" }}>
-                <Typography variant="subtitle1">{user.displayName}</Typography>
-                <Typography variant="caption">{user.email}</Typography>
-              </div>
-            </div>
-          )}
-        </Toolbar>
-      </AppBar>
       <div style={{ padding: "20px" }}>
         <Card style={{ marginBottom: "20px" }}>
           <CardContent>
             <Typography variant="h5" gutterBottom>
-              Upcoming Events
+              On-going events
             </Typography>
             <Typography variant="body2" color="textSecondary">
-              Explore and manage your events
+              Explore and book the event of your choice!
             </Typography>
           </CardContent>
           <CardContent>
