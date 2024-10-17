@@ -17,7 +17,8 @@ import {
 } from "@mui/material";
 import { Search, Event, People, LocationOn } from "@mui/icons-material";
 import { styled } from "@mui/system";
-import { auth } from "../firebase";
+import { auth, db } from "../firebase"; // Import Firestore instance
+import { collection, getDocs } from 'firebase/firestore';
 import { Link } from "react-router-dom";
 
 const theme = createTheme({
@@ -76,30 +77,6 @@ const ContentContainer = styled(Container)({
   zIndex: 1,
 });
 
-const featuredEvents = [
-  {
-    id: 1,
-    title: "Summer Music Festival",
-    description: "A weekend of live performances",
-    date: "15/07/2023",
-    location: "Central Park",
-  },
-  {
-    id: 2,
-    title: "Tech Conference 2023",
-    description: "Latest in technology and innovation",
-    date: "22/08/2023",
-    location: "Convention Center",
-  },
-  {
-    id: 3,
-    title: "Food & Wine Expo",
-    description: "Taste cuisines from around the world",
-    date: "10/09/2023",
-    location: "City Hall",
-  },
-];
-
 const howItWorks = [
   {
     icon: <Search />,
@@ -121,6 +98,9 @@ const howItWorks = [
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [user, setUser] = useState(null);
+  const [featuredEvents, setFeaturedEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
@@ -129,6 +109,44 @@ export default function HomePage() {
 
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const eventsCollection = collection(db, 'events');
+        const eventsSnapshot = await getDocs(eventsCollection);
+        const eventsList = eventsSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setFeaturedEvents(eventsList);
+        setLoading(false);
+      } catch (err) {
+        console.error("Error fetching events: ", err);
+        setError("Failed to load events. Please try again later.");
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
+  const formatDate = (timestamp) => {
+    const date = new Date(timestamp.seconds * 1000);
+    return new Intl.DateTimeFormat('en-US', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    }).format(date);
+  };
+
+  if (loading) {
+    return <div className="text-center p-4">Loading featured events...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center p-4 text-red-500">{error}</div>;
+  }
 
   return (
     <ThemeProvider theme={theme}>
@@ -191,7 +209,7 @@ export default function HomePage() {
                     <CardMedia
                       component="img"
                       height="140"
-                      image={`/placeholder.svg?height=140&width=300&text=Event+${event.id}`}
+                      image={event.mediaUrls && event.mediaUrls.length > 0 ? event.mediaUrls[0] : "/api/placeholder/400/200"}
                       alt={event.title}
                     />
                     <CardContent sx={{ flexGrow: 1 }}>
@@ -205,7 +223,7 @@ export default function HomePage() {
                         sx={{ mt: 2, display: "flex", alignItems: "center" }}
                       >
                         <Event fontSize="small" sx={{ mr: 1 }} />
-                        <Typography variant="body2">{event.date}</Typography>
+                        <Typography variant="body2">{formatDate(event.date)}</Typography>
                       </Box>
                       <Box
                         sx={{ mt: 1, display: "flex", alignItems: "center" }}
