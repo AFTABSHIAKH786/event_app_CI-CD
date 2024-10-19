@@ -158,7 +158,7 @@ const Navigation = () => {
               <MenuItem onClick={handleClose}>
                 <Typography>{user.displayName || user.email}</Typography>
               </MenuItem>
-              <MenuItem component={RouterLink} to="/profile" onClick={handleClose}>My Profile</MenuItem>
+              <MenuItem component={RouterLink} to="/bookings" onClick={handleClose}>My Bookings</MenuItem>
               <MenuItem onClick={handleSignOut}>Sign Out</MenuItem>
             </Menu>
           </>
