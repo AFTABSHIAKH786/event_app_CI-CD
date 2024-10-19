@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 import {
   Container,
   Paper,
@@ -10,31 +10,31 @@ import {
   Box,
   Divider,
   Snackbar,
-} from '@mui/material';
-import PrintIcon from '@mui/icons-material/Print';
-import EmailIcon from '@mui/icons-material/Email';
+} from "@mui/material";
+import PrintIcon from "@mui/icons-material/Print";
+import EmailIcon from "@mui/icons-material/Email";
 
 const BookingConfirmationPage = () => {
   const [bookingDetails, setBookingDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [snackbar, setSnackbar] = useState({ open: false, message: '' });
+  const [snackbar, setSnackbar] = useState({ open: false, message: "" });
   const { bookingId } = useParams();
 
   useEffect(() => {
     const fetchBookingDetails = async () => {
       try {
         const db = getFirestore();
-        const bookingRef = doc(db, 'bookedTickets', bookingId);
+        const bookingRef = doc(db, "bookedTickets", bookingId);
         const bookingSnap = await getDoc(bookingRef);
 
         if (bookingSnap.exists()) {
           setBookingDetails({ id: bookingSnap.id, ...bookingSnap.data() });
         } else {
-          setError('No booking found with this ID.');
+          setError("No booking found with this ID.");
         }
       } catch (err) {
-        setError('Error fetching booking details: ' + err.message);
+        setError("Error fetching booking details: " + err.message);
       } finally {
         setLoading(false);
       }
@@ -46,19 +46,27 @@ const BookingConfirmationPage = () => {
   }, [bookingId]);
 
   const formatDate = (date) => {
-    return new Date(date.seconds * 1000).toLocaleString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return new Date(date.seconds * 1000).toLocaleString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
   if (loading) {
     return (
-      <Container maxWidth="sm" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <Container
+        maxWidth="sm"
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
         <CircularProgress />
       </Container>
     );
@@ -66,7 +74,7 @@ const BookingConfirmationPage = () => {
 
   if (error) {
     return (
-      <Container maxWidth="sm" sx={{ textAlign: 'center', mt: 4 }}>
+      <Container maxWidth="sm" sx={{ textAlign: "center", mt: 4 }}>
         <Typography color="error">{error}</Typography>
       </Container>
     );
@@ -74,21 +82,25 @@ const BookingConfirmationPage = () => {
 
   if (!bookingDetails) {
     return (
-      <Container maxWidth="sm" sx={{ textAlign: 'center', mt: 4 }}>
+      <Container maxWidth="sm" sx={{ textAlign: "center", mt: 4 }}>
         <Typography>No booking details available.</Typography>
       </Container>
     );
   }
 
   // Generate QR code URL
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=BookingID:${bookingDetails.id}%0AEvent:${bookingDetails.eventTitle}%0ADate:${formatDate(bookingDetails.eventDate)}%0AName:${bookingDetails.userName}`;
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=BookingID:${
+    bookingDetails.id
+  }%0AEvent:${bookingDetails.eventTitle}%0ADate:${formatDate(
+    bookingDetails.eventDate
+  )}%0AName:${bookingDetails.userName}`;
 
   const sendConfirmationEmail = async () => {
     try {
-      const response = await fetch('/api/send-confirmation-email', {
-        method: 'POST',
+      const response = await fetch("/api/send-confirmation-email", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           email: bookingDetails.userEmail,
@@ -104,19 +116,30 @@ const BookingConfirmationPage = () => {
       });
 
       if (response.ok) {
-        setSnackbar({ open: true, message: 'Confirmation email sent successfully!' });
+        setSnackbar({
+          open: true,
+          message: "Confirmation email sent successfully!",
+        });
       } else {
-        throw new Error('Failed to send confirmation email');
+        throw new Error("Failed to send confirmation email");
       }
     } catch (error) {
-      setSnackbar({ open: true, message: 'Error sending confirmation email: ' + error.message });
+      setSnackbar({
+        open: true,
+        message: "Error sending confirmation email: " + error.message,
+      });
     }
   };
 
   return (
     <Container maxWidth="sm" sx={{ my: 4 }}>
       <Paper elevation={3} sx={{ p: 4 }}>
-        <Typography variant="h4" gutterBottom align="center" className='underline'>
+        <Typography
+          variant="h4"
+          gutterBottom
+          align="center"
+          className="underline"
+        >
           Booking Confirmation
         </Typography>
         <Divider sx={{ mb: 3 }} />
@@ -156,13 +179,13 @@ const BookingConfirmationPage = () => {
           </Typography>
         </Box>
         {/* QR Code Section */}
-        <Box sx={{ textAlign: 'center', mb: 3 }}>
+        <Box sx={{ textAlign: "center", mb: 3 }}>
           <Typography variant="body1" gutterBottom>
             Scan the QR code for booking details:
           </Typography>
-          <img src={qrCodeUrl} alt="QR Code" className='m-auto' />
+          <img src={qrCodeUrl} alt="QR Code" className="m-auto" />
         </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
+        <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
           <Button
             variant="contained"
             color="primary"
