@@ -17,6 +17,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'; // Storage 
 import { createEvent } from '../services/createEvent'; // Import the createEvent function
 import { getAuth } from 'firebase/auth'; // Firebase Auth function
 import { useNavigate } from 'react-router-dom';
+
 export default function EventCreation() {
   const [formData, setFormData] = useState({
     title: '',
@@ -24,6 +25,7 @@ export default function EventCreation() {
     description: '',
     capacity: '',
     ticketPrice: '',
+    venue: '', // New venue field
   });
   
   const [files, setFiles] = useState([]);
@@ -31,6 +33,7 @@ export default function EventCreation() {
   const [isAdmin, setIsAdmin] = useState(false); // Track if the user is an admin
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
   useEffect(() => {
     const checkAdmin = async () => {
       const user = getAuth().currentUser;
@@ -107,8 +110,8 @@ export default function EventCreation() {
       // Attempt to create the event
       await createEvent(eventData);
 
-      //navigate admin back to dashboard
-      navigate("/admin/dashboard")
+      // Navigate admin back to dashboard
+      navigate("/admin/dashboard");
     } catch (error) {
       console.error("Error creating event:", error); // Log the error
       alert("Failed to create event: " + error.message);
@@ -155,6 +158,16 @@ export default function EventCreation() {
                   onChange={handleInputChange}
                   multiline
                   rows={4}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Venue"
+                  name="venue"
+                  value={formData.venue}
+                  onChange={handleInputChange}
                   required
                 />
               </Grid>

@@ -46,6 +46,7 @@ const AdminDashboard = () => {
             <tr>
               <th className="border border-gray-300 p-2">Title</th>
               <th className="border border-gray-300 p-2">Date</th>
+              <th className="border border-gray-300 p-2">Venue</th> {/* New Venue Column */}
               <th className="border border-gray-300 p-2">Capacity</th>
               <th className="border border-gray-300 p-2">Ticket Price</th>
               <th className="border border-gray-300 p-2">Actions</th>
@@ -58,6 +59,7 @@ const AdminDashboard = () => {
                 <tr key={doc.id}>
                   <td className="border border-gray-300 p-2">{eventData.title}</td>
                   <td className="border border-gray-300 p-2">{eventData.date.toDate().toLocaleString()}</td>
+                  <td className="border border-gray-300 p-2">{eventData.venue}</td> {/* Display Venue */}
                   <td className="border border-gray-300 p-2">{eventData.capacity}</td>
                   <td className="border border-gray-300 p-2">${eventData.ticketPrice}</td>
                   <td className="border border-gray-300 p-2">

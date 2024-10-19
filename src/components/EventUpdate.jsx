@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { doc, getDoc, updateDoc, deleteField } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../firebase';
 
 const EventUpdate = () => {
@@ -10,9 +10,10 @@ const EventUpdate = () => {
   const [formData, setFormData] = useState({
     title: '',
     date: '',
+    venue: '', // New Venue Field
     capacity: '',
     ticketPrice: '',
-    images: []
+    mediaUrls: [] // Change to mediaUrls
   });
   const [newImages, setNewImages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,9 +28,10 @@ const EventUpdate = () => {
           setFormData({
             title: eventData.title,
             date: eventData.date.toDate().toISOString().split('T')[0],
+            venue: eventData.venue, // Set Venue
             capacity: eventData.capacity,
             ticketPrice: eventData.ticketPrice,
-            images: eventData.images || []
+            mediaUrls: eventData.mediaUrls || [] // Use mediaUrls
           });
         } else {
           setError('Event not found');
@@ -65,7 +67,7 @@ const EventUpdate = () => {
   const handleRemoveExistingImage = (index) => {
     setFormData(prevData => ({
       ...prevData,
-      images: prevData.images.filter((_, i) => i !== index)
+      mediaUrls: prevData.mediaUrls.filter((_, i) => i !== index) // Update to mediaUrls
     }));
   };
 
@@ -85,14 +87,15 @@ const EventUpdate = () => {
     setLoading(true);
     try {
       const uploadedImageUrls = await uploadImages();
-      const updatedImages = [...formData.images, ...uploadedImageUrls];
+      const updatedMediaUrls = [...formData.mediaUrls, ...uploadedImageUrls]; // Update to mediaUrls
       
       await updateDoc(doc(db, 'events', eventId), {
         title: formData.title,
         date: new Date(formData.date),
+        venue: formData.venue, // Update Venue
         capacity: Number(formData.capacity),
         ticketPrice: Number(formData.ticketPrice),
-        images: updatedImages
+        mediaUrls: updatedMediaUrls // Update to mediaUrls
       });
 
       alert('Event updated successfully');
@@ -137,6 +140,18 @@ const EventUpdate = () => {
           />
         </div>
         <div>
+          <label htmlFor="venue" className="block mb-1">Venue</label>
+          <input
+            type="text"
+            id="venue"
+            name="venue"
+            value={formData.venue}
+            onChange={handleChange}
+            required
+            className="w-full px-3 py-2 border rounded"
+          />
+        </div>
+        <div>
           <label htmlFor="capacity" className="block mb-1">Capacity</label>
           <input
             type="number"
@@ -161,11 +176,15 @@ const EventUpdate = () => {
           />
         </div>
         <div>
-          <label className="block mb-1">Existing Images</label>
+          <label className="block mb-1">Existing Media</label>
           <div className="flex flex-wrap gap-2">
-            {formData.images.map((url, index) => (
+            {formData.mediaUrls.map((url, index) => (
               <div key={index} className="relative">
-                <img src={url} alt={`Event ${index}`} className="w-24 h-24 object-cover" />
+                {url.endsWith('.mp4') || url.endsWith('.webm') ? ( // Check if it's a video
+                  <video src={url} className="w-24 h-24 object-cover" controls />
+                ) : (
+                  <img src={url} alt={`Event ${index}`} className="w-24 h-24 object-cover" />
+                )}
                 <button
                   type="button"
                   onClick={() => handleRemoveExistingImage(index)}
@@ -178,22 +197,26 @@ const EventUpdate = () => {
           </div>
         </div>
         <div>
-          <label htmlFor="newImages" className="block mb-1">Add New Images</label>
+          <label htmlFor="newImages" className="block mb-1">Add New Media</label>
           <input
             type="file"
             id="newImages"
             onChange={handleImageUpload}
             multiple
-            accept="image/*"
+            accept="image/*,video/*" // Allow both images and videos
             className="w-full px-3 py-2 border rounded"
           />
         </div>
         <div>
-          <label className="block mb-1">New Images to Upload</label>
+          <label className="block mb-1">New Media to Upload</label>
           <div className="flex flex-wrap gap-2">
             {newImages.map((file, index) => (
               <div key={index} className="relative">
-                <img src={URL.createObjectURL(file)} alt={`New ${index}`} className="w-24 h-24 object-cover" />
+                {file.type.startsWith('image/') ? (
+                  <img src={URL.createObjectURL(file)} alt={`New ${index}`} className="w-24 h-24 object-cover" />
+                ) : (
+                  <video src={URL.createObjectURL(file)} className="w-24 h-24 object-cover" controls />
+                )}
                 <button
                   type="button"
                   onClick={() => handleRemoveNewImage(index)}

@@ -19,7 +19,7 @@ import { Search, Event, People, LocationOn } from "@mui/icons-material";
 import { styled } from "@mui/system";
 import { auth, db } from "../firebase"; // Import Firestore instance
 import { collection, getDocs } from 'firebase/firestore';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const theme = createTheme({
   palette: {
@@ -72,7 +72,7 @@ const BackgroundContainer = styled("div")({
   color: "white",
 });
 
-const ContentContainer = styled(Container)({
+const ContentContainer = styled(Container)( {
   position: "relative",
   zIndex: 1,
 });
@@ -101,7 +101,7 @@ export default function HomePage() {
   const [featuredEvents, setFeaturedEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const navigate = useNavigate();
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
       setUser(currentUser); // Update user state
@@ -119,7 +119,7 @@ export default function HomePage() {
           id: doc.id,
           ...doc.data()
         }));
-        setFeaturedEvents(eventsList);
+        setFeaturedEvents(eventsList.slice(0, 3)); // Limit to 3 events
         setLoading(false);
       } catch (err) {
         console.error("Error fetching events: ", err);
@@ -141,12 +141,16 @@ export default function HomePage() {
   };
 
   if (loading) {
-    return <div className="text-center p-4">Loading featured events...</div>;
+    return <div className="text-center p-4">Loading...</div>;
   }
 
   if (error) {
     return <div className="text-center p-4 text-red-500">{error}</div>;
   }
+
+  const handleViewDetails = (eventId) => {
+    navigate(`/event/${eventId}`);
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -230,13 +234,15 @@ export default function HomePage() {
                       >
                         <LocationOn fontSize="small" sx={{ mr: 1 }} />
                         <Typography variant="body2">
-                          {event.location}
+                          {event.venue}
                         </Typography>
                       </Box>
                     </CardContent>
                     <CardActions>
-                      <Button size="small" color="primary">
-                        Book Now
+                      <Button size="small" color="primary"
+                        onClick={() => handleViewDetails(event.id)}
+                        >
+                        View Details
                       </Button>
                     </CardActions>
                   </Card>

@@ -11,6 +11,7 @@ import PrivateRoute from './utils/PrivateRoute';
 import AdminDashboard from './components/AdminDashboard';
 import EventCreation from './components/EventCreation';
 import EventUpdate from './components/EventUpdate';
+import EventDescriptionPage from './components/EventDesctiption';
 function App() {
   return (
     <AuthProvider>
@@ -23,8 +24,9 @@ function App() {
             <Route path="/signin" element={<SignIn />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/admin/login" element={<AdminLoginPage />} />
-            <Route path="/admin/event/createevent" element={<EventCreation />} />
+            <Route path="/admin/event/create" element={<EventCreation />} />
             <Route path="/admin/event/edit/:eventId" element={<EventUpdate />} />
+            <Route path="/event/:eventId" element={<EventDescriptionPage />} />
             <Route 
               path='/admin/dashboard'
               element={
