@@ -59,6 +59,7 @@ const Dashboard = () => {
     navigate(`/event/${eventId}`);
   };
 
+
   if (loading) {
     return <div className="text-center p-4">Loading events...</div>;
   }
@@ -97,6 +98,7 @@ const Dashboard = () => {
               Explore and book the event of your choice!
             </Typography>
             <Autocomplete
+              className='mt-3'
               freeSolo
               options={suggestions}
               renderInput={(params) => (
@@ -141,11 +143,9 @@ const Dashboard = () => {
                       variant="outlined" 
                       color="primary"
                       onClick={() => handleViewDetails(event.id)}
+                      fullWidth
                     >
                       View Details
-                    </Button>
-                    <Button variant="contained" color="primary">
-                      Book Now
                     </Button>
                   </div>
                 </div>

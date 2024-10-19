@@ -12,6 +12,10 @@ const AdminDashboard = () => {
   const [events] = useCollection(collection(db, 'events'));
   const [bookings] = useCollection(collection(db, 'bookings'));
   const [users] = useCollection(collection(db, 'users'));
+  const [tickets] = useCollection(collection(db, 'tickets'));
+  
+  // Fetch booked tickets from 'bookedTickets' collection
+  const [bookedTickets] = useCollection(collection(db, 'bookedTickets'));
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -46,7 +50,7 @@ const AdminDashboard = () => {
             <tr>
               <th className="border border-gray-300 p-2">Title</th>
               <th className="border border-gray-300 p-2">Date</th>
-              <th className="border border-gray-300 p-2">Venue</th> {/* New Venue Column */}
+              <th className="border border-gray-300 p-2">Venue</th>
               <th className="border border-gray-300 p-2">Capacity</th>
               <th className="border border-gray-300 p-2">Ticket Price</th>
               <th className="border border-gray-300 p-2">Actions</th>
@@ -59,7 +63,7 @@ const AdminDashboard = () => {
                 <tr key={doc.id}>
                   <td className="border border-gray-300 p-2">{eventData.title}</td>
                   <td className="border border-gray-300 p-2">{eventData.date.toDate().toLocaleString()}</td>
-                  <td className="border border-gray-300 p-2">{eventData.venue}</td> {/* Display Venue */}
+                  <td className="border border-gray-300 p-2">{eventData.venue}</td>
                   <td className="border border-gray-300 p-2">{eventData.capacity}</td>
                   <td className="border border-gray-300 p-2">${eventData.ticketPrice}</td>
                   <td className="border border-gray-300 p-2">
@@ -77,66 +81,37 @@ const AdminDashboard = () => {
     </div>
   );
 
-  const renderBookingsList = () => (
+  const renderTicketsList = () => (
     <div>
-      <h2 className="text-xl font-semibold mb-2">Event Bookings</h2>
-      {bookings && bookings.docs.length > 0 ? (
+      <h2 className="text-xl font-semibold mb-2">Booked Tickets</h2>
+      {bookedTickets && bookedTickets.docs.length > 0 ? (
         <table className="min-w-full border-collapse border border-gray-200">
           <thead>
             <tr>
               <th className="border border-gray-300 p-2">User</th>
               <th className="border border-gray-300 p-2">Event</th>
+              <th className="border border-gray-300 p-2">Ticket Count</th>
               <th className="border border-gray-300 p-2">Booking Date</th>
-              <th className="border border-gray-300 p-2">Status</th>
+              <th className="border border-gray-300 p-2">Total</th>
             </tr>
           </thead>
           <tbody>
-            {bookings.docs.map((doc) => {
-              const bookingData = doc.data();
+            {bookedTickets.docs.map((doc) => {
+              const ticketData = doc.data();
               return (
                 <tr key={doc.id}>
-                  <td className="border border-gray-300 p-2">{bookingData.user}</td>
-                  <td className="border border-gray-300 p-2">{bookingData.eventTitle}</td>
-                  <td className="border border-gray-300 p-2">{bookingData.bookingDate.toDate().toLocaleString()}</td>
-                  <td className="border border-gray-300 p-2">{bookingData.status}</td>
+                  <td className="border border-gray-300 p-2">{ticketData.userName}</td>
+                  <td className="border border-gray-300 p-2">{ticketData.eventTitle}</td>
+                  <td className="border border-gray-300 p-2">{ticketData.quantity}</td>
+                  <td className="border border-gray-300 p-2">{ticketData.bookingDate.toDate().toLocaleString()}</td>
+                  <td className="border border-gray-300 p-2">${ticketData.totalPrice}</td>
                 </tr>
               );
             })}
           </tbody>
         </table>
       ) : (
-        <p>No bookings found.</p>
-      )}
-    </div>
-  );
-
-  const renderUsersList = () => (
-    <div>
-      <h2 className="text-xl font-semibold mb-2">User Details</h2>
-      {users && users.docs.length > 0 ? (
-        <table className="min-w-full border-collapse border border-gray-200">
-          <thead>
-            <tr>
-              <th className="border border-gray-300 p-2">Name</th>
-              <th className="border border-gray-300 p-2">Email</th>
-              <th className="border border-gray-300 p-2">Role</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.docs.map((doc) => {
-              const userData = doc.data();
-              return (
-                <tr key={doc.id}>
-                  <td className="border border-gray-300 p-2">{userData.name}</td>
-                  <td className="border border-gray-300 p-2">{userData.email}</td>
-                  <td className="border border-gray-300 p-2">{userData.role}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      ) : (
-        <p>No users found.</p>
+        <p>No tickets found.</p>
       )}
     </div>
   );
@@ -145,10 +120,8 @@ const AdminDashboard = () => {
     switch (activeTab) {
       case 'events':
         return renderEventsList();
-      case 'bookings':
-        return renderBookingsList();
-      case 'users':
-        return renderUsersList();
+      case 'tickets': // Keep only the tickets case
+        return renderTicketsList();
       default:
         return null;
     }
@@ -176,16 +149,10 @@ const AdminDashboard = () => {
           All Events
         </button>
         <button 
-          onClick={() => handleTabChange('bookings')}
-          className={`mr-2 px-4 py-2 ${activeTab === 'bookings' ? 'bg-gray-300' : 'bg-gray-200'}`}
+          onClick={() => handleTabChange('tickets')} // Keep only the tickets button
+          className={`px-4 py-2 ${activeTab === 'tickets' ? 'bg-gray-300' : 'bg-gray-200'}`}
         >
-          Event Bookings
-        </button>
-        <button 
-          onClick={() => handleTabChange('users')}
-          className={`px-4 py-2 ${activeTab === 'users' ? 'bg-gray-300' : 'bg-gray-200'}`}
-        >
-          User Details
+          Booked Tickets
         </button>
       </div>
 

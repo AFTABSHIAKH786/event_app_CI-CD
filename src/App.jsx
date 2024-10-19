@@ -12,6 +12,8 @@ import AdminDashboard from './components/AdminDashboard';
 import EventCreation from './components/EventCreation';
 import EventUpdate from './components/EventUpdate';
 import EventDescriptionPage from './components/EventDesctiption';
+import EventBookingPage from './components/EventBookingPage';
+import BookingConfirmationPage from './components/BookingConfirmationPage';
 function App() {
   return (
     <AuthProvider>
@@ -27,6 +29,8 @@ function App() {
             <Route path="/admin/event/create" element={<EventCreation />} />
             <Route path="/admin/event/edit/:eventId" element={<EventUpdate />} />
             <Route path="/event/:eventId" element={<EventDescriptionPage />} />
+            <Route path="/book-event/:eventId" element={<EventBookingPage />} />
+            <Route path="/booking-confirmation/:bookingId" element={<BookingConfirmationPage />} />
             <Route 
               path='/admin/dashboard'
               element={

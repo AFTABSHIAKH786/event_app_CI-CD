@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   Box,
   Typography,
@@ -49,7 +49,7 @@ export default function EventDescriptionPage() {
   const [similarEvents, setSimilarEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const navigate = useNavigate();
   useEffect(() => {
     const fetchEventAndSimilar = async () => {
       try {
@@ -87,6 +87,11 @@ export default function EventDescriptionPage() {
 
     fetchEventAndSimilar();
   }, [eventId]);
+
+  //redirecting to booking page 
+  const handleBookNow = ()  => {
+    navigate(`/book-event/${eventId}`);
+  }
 
   if (loading) {
     return (
@@ -166,16 +171,18 @@ export default function EventDescriptionPage() {
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <PeopleIcon sx={{ mr: 1 }} color="primary" />
-                  <Typography variant="body1">Capacity: {event.capacity}</Typography>
+                  <Typography variant="body1">Available Tickets: {event.capacity}</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
                   <AttachMoneyIcon sx={{ mr: 1 }} color="primary" />
                   <Typography variant="body1">Price: ${event.ticketPrice}</Typography>
                 </Box>
+                
                 <AnimatedButton
                   variant="contained"
                   color="primary"
                   size="large"
+                  onClick={handleBookNow}
                   fullWidth
                 >
                   BOOK NOW
