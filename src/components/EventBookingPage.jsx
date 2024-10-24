@@ -83,7 +83,7 @@ const EventBookingPage = () => {
 
   const createRazorpayOrder = async (totalAmount) => {
     try {
-      const response = await fetch("http://localhost:5000/api/create-order", {
+      const response = await fetch("https://experiment-git-main-aftabs-projects-bd349269.vercel.app/api/create-order", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -299,7 +299,7 @@ const EventBookingPage = () => {
                 <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
                   <AttachMoneyIcon sx={{ mr: 1 }} color="primary" />
                   <Typography variant="body1">
-                    Price: ${event.ticketPrice} per ticket
+                    Price: ₹{event.ticketPrice} per ticket
                   </Typography>
                 </Box>
               </CardContent>
@@ -352,7 +352,7 @@ const EventBookingPage = () => {
                 </RadioGroup>
               </FormControl>
               <Typography variant="body1" gutterBottom>
-                Total Price: Rs.{event.ticketPrice * quantity}
+                Total Price: ₹{event.ticketPrice * quantity}
               </Typography>
               {error && (
                 <Typography color="error" gutterBottom>

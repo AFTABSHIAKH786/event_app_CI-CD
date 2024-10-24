@@ -103,7 +103,7 @@ const BookingComponent = ({ event, userId }) => {
         InputProps={{ inputProps: { min: 1 } }}
       />
       <Typography variant="body1" sx={{ mt: 2 }}>
-        Total Price: ${event.ticketPrice * quantity}
+        Total Price: ₹{event.ticketPrice * quantity}
       </Typography>
       {error && (
         <Typography color="error" sx={{ mt: 2 }}>

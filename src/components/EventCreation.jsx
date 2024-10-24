@@ -192,7 +192,7 @@ export default function EventCreation() {
                   value={formData.ticketPrice}
                   onChange={handleInputChange}
                   InputProps={{
-                    startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                    startAdornment: <InputAdornment position="start">₹</InputAdornment>,
                     inputProps: { min: 0, step: 0.01 },
                   }}
                   required

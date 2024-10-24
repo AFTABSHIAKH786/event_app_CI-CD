@@ -175,7 +175,7 @@ export default function EventDescriptionPage() {
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
                   <AttachMoneyIcon sx={{ mr: 1 }} color="primary" />
-                  <Typography variant="body1">Price: ${event.ticketPrice}</Typography>
+                  <Typography variant="body1">Price: ₹{event.ticketPrice}</Typography>
                 </Box>
                 
                 <AnimatedButton

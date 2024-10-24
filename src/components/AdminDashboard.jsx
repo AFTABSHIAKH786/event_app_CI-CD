@@ -132,7 +132,7 @@ const AdminDashboard = () => {
                     {ticketData.bookingDate.toDate().toLocaleString()}
                   </td>
                   <td className="border border-gray-300 p-2">
-                    ${ticketData.totalPrice}
+                  ₹{ticketData.totalPrice}
                   </td>
                 </tr>
               );

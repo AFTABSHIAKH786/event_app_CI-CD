@@ -120,7 +120,7 @@ const BookingConfirmationPage = () => {
             Tickets: {bookingDetails.quantity}
           </Typography>
           <Typography variant="body1" gutterBottom>
-            Total Price: ${bookingDetails.totalPrice.toFixed(2)}
+            Total Price: ₹{bookingDetails.totalPrice.toFixed(2)}
           </Typography>
         </Box>
         <Divider sx={{ mb: 3 }} />
