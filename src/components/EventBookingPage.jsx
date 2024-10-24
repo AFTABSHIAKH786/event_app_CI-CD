@@ -34,8 +34,9 @@ const EventBookingPage = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [quantity, setQuantity] = useState(1);
-  const [paymentMethod, setPaymentMethod] = useState("credit_card");
+  const [paymentMethod, setPaymentMethod] = useState("razorpay");
   const [user, setUser] = useState(null);
+  const [orderId, setOrderId] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -69,17 +70,79 @@ const EventBookingPage = () => {
     fetchEvent();
   }, [eventId]);
 
-  const handleBooking = async (e) => {
-    e.preventDefault();
-    if (!user) {
-      setError("You must be logged in to book tickets");
-      return;
-    }
-    setLoading(true);
-    setError(null);
+  // Load Razorpay script
+  useEffect(() => {
+    const loadRazorpayScript = async () => {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.async = true;
+      document.body.appendChild(script);
+    };
+    loadRazorpayScript();
+  }, []);
 
+  const createRazorpayOrder = async (totalAmount) => {
     try {
-      let bookingDocRef; // Ensure this is defined
+      const response = await fetch("http://localhost:5000/api/create-order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          amount: totalAmount * 100, // Convert to paise
+        }),
+      });
+      const data = await response.json();
+      return data.id;
+    } catch (error) {
+      console.error("Error creating Razorpay order:", error);
+      throw error;
+    }
+  };
+
+  const handlePayment = async (bookingData) => {
+    try {
+      const totalAmount = event.ticketPrice * quantity;
+      const orderID = await createRazorpayOrder(totalAmount);
+      setOrderId(orderID);
+
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: totalAmount * 100,
+        currency: "INR",
+        name: "Event Booking",
+        description: `Booking for ${event.title}`,
+        order_id: orderID,
+        handler: async function (response) {
+          try {
+            console.log("Payment response:", response); // Log the response for debugging
+
+            // Directly complete the booking process without verification
+            await completeBooking(bookingData, response.razorpay_payment_id);
+          } catch (error) {
+            console.error("Error completing booking:", error);
+            setError("Failed to complete booking");
+          }
+        },
+        prefill: {
+          name: name,
+          email: email,
+        },
+        theme: {
+          color: "#3f51b5",
+        },
+      };
+
+      const razorpayInstance = new window.Razorpay(options);
+      razorpayInstance.open();
+    } catch (error) {
+      console.error("Payment initiation error:", error);
+      setError("Failed to initiate payment");
+    }
+  };
+
+  const completeBooking = async (bookingData, paymentId) => {
+    try {
       await runTransaction(db, async (transaction) => {
         const eventRef = doc(db, "events", eventId);
         const eventDoc = await transaction.get(eventRef);
@@ -94,34 +157,54 @@ const EventBookingPage = () => {
         }
 
         const newCapacity = eventData.capacity - quantity;
-
         transaction.update(eventRef, { capacity: newCapacity });
 
-        const bookingRef = collection(db, "bookedTickets");
-        bookingDocRef = doc(bookingRef); // Define bookingDocRef here
-        transaction.set(bookingDocRef, { // Use bookingDocRef for the booking
-          userId: user.uid,
-          eventId: event.id,
-          eventTitle: event.title,
-          eventDate: event.date,
-          eventVenue: event.venue,
-          userName: name,
-          userEmail: email,
-          quantity: quantity,
-          unitPrice: event.ticketPrice,
-          totalPrice: event.ticketPrice * quantity,
-          paymentMethod: paymentMethod,
+        const bookingRef = doc(collection(db, "bookedTickets"));
+        transaction.set(bookingRef, {
+          ...bookingData,
+          paymentId: paymentId,
           paymentStatus: "completed",
           bookingStatus: "confirmed",
-          bookingDate: new Date(),
         });
-      });
 
-      // Redirect to the BookingConfirmationPage with the booking ID
-      navigate(`/booking-confirmation/${bookingDocRef.id}`); // Use bookingDocRef.id here
+        // Navigate to confirmation page after successful booking
+        navigate(`/booking-confirmation/${bookingRef.id}`);
+      });
+    } catch (error) {
+      console.error("Error completing booking:", error);
+      setError("Failed to complete booking");
+    }
+  };
+
+  const handleBooking = async (e) => {
+    e.preventDefault();
+    if (!user) {
+      setError("You must be logged in to book tickets");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+
+    try {
+      const bookingData = {
+        userId: user.uid,
+        eventId: event.id,
+        eventTitle: event.title,
+        eventDate: event.date,
+        eventVenue: event.venue,
+        userName: name,
+        userEmail: email,
+        quantity: quantity,
+        unitPrice: event.ticketPrice,
+        totalPrice: event.ticketPrice * quantity,
+        paymentMethod: paymentMethod,
+        bookingDate: new Date(),
+      };
+
+      await handlePayment(bookingData);
     } catch (err) {
-      console.error("Error booking ticket:", err);
-      setError(err.message || "Failed to book ticket");
+      console.error("Error initiating booking:", err);
+      setError(err.message || "Failed to initiate booking");
     } finally {
       setLoading(false);
     }
@@ -262,19 +345,14 @@ const EventBookingPage = () => {
                   onChange={(e) => setPaymentMethod(e.target.value)}
                 >
                   <FormControlLabel
-                    value="credit_card"
+                    value="razorpay"
                     control={<Radio />}
-                    label="Credit Card"
-                  />
-                  <FormControlLabel
-                    value="paypal"
-                    control={<Radio />}
-                    label="PayPal"
+                    label="Razorpay"
                   />
                 </RadioGroup>
               </FormControl>
               <Typography variant="body1" gutterBottom>
-                Total Price: ${event.ticketPrice * quantity}
+                Total Price: Rs.{event.ticketPrice * quantity}
               </Typography>
               {error && (
                 <Typography color="error" gutterBottom>

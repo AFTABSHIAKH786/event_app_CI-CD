@@ -15,6 +15,7 @@ import EventDescriptionPage from './components/EventDesctiption';
 import EventBookingPage from './components/EventBookingPage';
 import BookingConfirmationPage from './components/BookingConfirmationPage';
 import BookedTicketsPage from './components/BookedTicketsPage';
+
 function App() {
   return (
     <AuthProvider>

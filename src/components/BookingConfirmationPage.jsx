@@ -12,7 +12,6 @@ import {
   Snackbar,
 } from "@mui/material";
 import PrintIcon from "@mui/icons-material/Print";
-import EmailIcon from "@mui/icons-material/Email";
 
 const BookingConfirmationPage = () => {
   const [bookingDetails, setBookingDetails] = useState(null);
@@ -56,6 +55,8 @@ const BookingConfirmationPage = () => {
     });
   };
 
+  
+
   if (loading) {
     return (
       <Container
@@ -95,41 +96,6 @@ const BookingConfirmationPage = () => {
     bookingDetails.eventDate
   )}%0AName:${bookingDetails.userName}`;
 
-  const sendConfirmationEmail = async () => {
-    try {
-      const response = await fetch("/api/send-confirmation-email", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: bookingDetails.userEmail,
-          bookingDetails: {
-            id: bookingDetails.id,
-            eventTitle: bookingDetails.eventTitle,
-            eventDate: formatDate(bookingDetails.eventDate),
-            quantity: bookingDetails.quantity,
-            totalPrice: bookingDetails.totalPrice,
-            userName: bookingDetails.userName,
-          },
-        }),
-      });
-
-      if (response.ok) {
-        setSnackbar({
-          open: true,
-          message: "Confirmation email sent successfully!",
-        });
-      } else {
-        throw new Error("Failed to send confirmation email");
-      }
-    } catch (error) {
-      setSnackbar({
-        open: true,
-        message: "Error sending confirmation email: " + error.message,
-      });
-    }
-  };
 
   return (
     <Container maxWidth="sm" sx={{ my: 4 }}>
@@ -193,14 +159,6 @@ const BookingConfirmationPage = () => {
             onClick={() => window.print()}
           >
             Print Confirmation
-          </Button>
-          <Button
-            variant="contained"
-            color="secondary"
-            startIcon={<EmailIcon />}
-            onClick={sendConfirmationEmail}
-          >
-            Send Email Confirmation
           </Button>
         </Box>
       </Paper>

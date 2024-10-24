@@ -1,22 +1,50 @@
-import { useState, useEffect } from 'react';
-import { getAuth } from 'firebase/auth'; // Import Firebase Auth
+import React, { useState, useEffect } from 'react';
+import { getAuth } from 'firebase/auth';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
-import { Link } from 'react-router-dom'; // Import Link for navigation
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, Paper } from '@mui/material'; // Import Material-UI components
+import { Link } from 'react-router-dom';
+import { 
+  List, 
+  ListItem, 
+  ListItemText, 
+  Typography, 
+  Button, 
+  CircularProgress,
+  Paper,
+  Box,
+  Container,
+  Grid
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
+
+const AnimatedListItem = styled(ListItem)(({ theme }) => ({
+  transition: 'all 0.3s ease',
+  '&:hover': {
+    transform: 'translateY(-5px)',
+    boxShadow: '0 4px 20px 0 rgba(0,0,0,0.12)',
+    backgroundColor: theme.palette.action.hover,
+  },
+}));
+
+const EventImage = styled('img')({
+  width: '100%',
+  height: '100px',
+  objectFit: 'cover',
+  borderRadius: '4px',
+});
 
 const BookedTicketsPage = () => {
   const [bookedTickets, setBookedTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  const auth = getAuth(); // Get the Firebase Auth instance
-  const user = auth.currentUser; // Get the currently logged-in user
-  const userEmail = user ? user.email : null; // Get the user's email
+  const auth = getAuth();
+  const user = auth.currentUser;
+  const userEmail = user ? user.email : null;
 
   useEffect(() => {
     const fetchBookedTickets = async () => {
       if (!userEmail) {
-        setError('User is not logged in.'); // Handle case where user is not logged in
+        setError('User is not logged in.');
         setLoading(false);
         return;
       }
@@ -24,76 +52,97 @@ const BookedTicketsPage = () => {
       try {
         const db = getFirestore();
         const ticketsRef = collection(db, 'bookedTickets');
-        const q = query(ticketsRef, where('userEmail', '==', userEmail)); // Query to find tickets by userEmail
+        const q = query(ticketsRef, where('userEmail', '==', userEmail));
         const querySnapshot = await getDocs(q);
 
         const tickets = [];
         querySnapshot.forEach((doc) => {
           const data = doc.data();
-          tickets.push({ id: doc.id, ...data, eventDate: data.eventDate.toDate() }); // Convert Firestore timestamp to Date
+          tickets.push({ id: doc.id, ...data, eventDate: data.eventDate.toDate() });
         });
 
-        console.log("Fetched tickets:", tickets); // Debugging: log fetched tickets
-        setBookedTickets(tickets); // Set the booked tickets state
+        // Sort tickets by date, most recent first
+        tickets.sort((a, b) => b.eventDate - a.eventDate);
+
+        setBookedTickets(tickets);
       } catch (err) {
-        console.error("Error fetching booked tickets:", err); // Debugging: log error
-        setError('Error fetching booked tickets: ' + err.message); // Handle errors
+        console.error("Error fetching booked tickets:", err);
+        setError('Error fetching booked tickets: ' + err.message);
       } finally {
-        setLoading(false); // Set loading to false after fetching
+        setLoading(false);
       }
     };
 
-    fetchBookedTickets(); // Call the function to fetch tickets
-  }, [userEmail]); // Dependency array includes userEmail
+    fetchBookedTickets();
+  }, [userEmail]);
 
   if (loading) {
-    return <div>Loading...</div>; // Loading state
+    return <CircularProgress style={{ display: 'block', margin: '20px auto' }} />;
   }
 
   if (error) {
-    return <div>{error}</div>; // Error state
+    return <Typography color="error" align="center" style={{ margin: '20px' }}>{error}</Typography>;
   }
 
   return (
-    <div>
-      <h1 className='text-xl text-center p-4 '>Booked Tickets</h1>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Typography variant="h4" align="center" gutterBottom>
+        Booked Tickets
+      </Typography>
       {bookedTickets.length === 0 ? (
-        <p>No tickets found.</p> // Message if no tickets are found
+        <Typography align="center" color="textSecondary">No tickets found.</Typography>
       ) : (
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Event Title</TableCell>
-                <TableCell>Event Date</TableCell>
-                <TableCell>Quantity</TableCell>
-                <TableCell>Total Price</TableCell>
-                <TableCell>User Name</TableCell>
-                <TableCell>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {bookedTickets.map((ticket) => (
-                <TableRow key={ticket.id}>
-                  <TableCell>{ticket.eventTitle}</TableCell>
-                  <TableCell>{ticket.eventDate.toLocaleString()}</TableCell>
-                  <TableCell>{ticket.quantity}</TableCell>
-                  <TableCell>${ticket.totalPrice}</TableCell>
-                  <TableCell>{ticket.userName}</TableCell>
-                  <TableCell>
-                    <Link to={`/booking-confirmation/${ticket.id}`}>
-                      <Button variant="contained" color="primary">
+        <Paper elevation={3}>
+          <List>
+            {bookedTickets.map((ticket, index) => (
+              <React.Fragment key={ticket.id}>
+                {index > 0 && <Box sx={{ borderBottom: 1, borderColor: 'divider' }} />}
+                <AnimatedListItem>
+                  <Grid container spacing={2} alignItems="center">
+                    
+                    <Grid item xs={12} sm={6}>
+                      <ListItemText
+                        primary={ticket.eventTitle}
+                        secondary={
+                          <React.Fragment>
+                            <Typography component="span" variant="body2" color="textPrimary">
+                              Date: {ticket.eventDate.toLocaleString()}
+                            </Typography>
+                            <br />
+                            <Typography component="span" variant="body2" color="textPrimary">
+                              Quantity: {ticket.quantity}
+                            </Typography>
+                            <br />
+                            <Typography component="span" variant="body2" color="textPrimary">
+                              Total Price: ₹{ticket.totalPrice}
+                            </Typography>
+                            <br />
+                            <Typography component="span" variant="body2" color="textPrimary">
+                              Booked by: {ticket.userName}
+                            </Typography>
+                          </React.Fragment>
+                        }
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={3}>
+                      <Button 
+                        component={Link} 
+                        to={`/booking-confirmation/${ticket.id}`}
+                        variant="contained" 
+                        color="primary" 
+                        fullWidth
+                      >
                         View Confirmation
                       </Button>
-                    </Link>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+                    </Grid>
+                  </Grid>
+                </AnimatedListItem>
+              </React.Fragment>
+            ))}
+          </List>
+        </Paper>
       )}
-    </div>
+    </Container>
   );
 };
 
