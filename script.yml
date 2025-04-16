@@ -1,0 +1,47 @@
+---
+- name: Deploy Angular App with Docker
+  hosts: ubuntu
+  become: yes
+  tasks:
+    - name: Ensure Docker service is running
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Remove existing Docker container if running
+      docker_container:
+        name: event_app
+        state: absent
+
+    - name: Clean up old Docker images
+      shell: docker image prune -f
+      ignore_errors: yes
+
+    - name: Upload the latest build to the server
+      copy:
+        src: /home/aftab/Desktop/Jenkins/workspace/event_app/dist
+        dest: /tmp/latest-build/
+        mode: "0755"
+    
+    - name: Copy nginx.conf to the deployment directory
+      copy:
+        src: /home/aftab/Desktop/Jenkins/workspace/event_app/nginx.conf
+        dest: "/tmp/latest-build/"
+    
+    - name: Copy Dockerfile to the deployment directory
+      copy:
+        src: /home/aftab/Desktop/Jenkins/workspace/event_app/Dockerfile
+        dest: "/tmp/latest-build"
+
+    - name: Build Docker image for Angular App using Dockerfile
+      shell: docker build -t event_app:latest /tmp/latest-build/
+
+    - name: Run Docker container for Angular App
+      docker_container:
+        name: event_app
+        image: event_app:latest
+        state: started
+        ports:
+          - "5173:80"
+        restart_policy: always

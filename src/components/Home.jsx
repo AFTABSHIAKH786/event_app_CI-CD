@@ -169,7 +169,7 @@ export default function HomePage() {
               gutterBottom
               sx={{ fontWeight: "bold" }}
             >
-              Discover Amazing Events
+              Discover Amazing  Events Aftab
             </Typography>
             <Typography variant="h5" component="p" gutterBottom>
               Find and book the perfect event for any occasion
